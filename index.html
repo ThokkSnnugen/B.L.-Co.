@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B.L. Co | Operacional Elite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Oswald:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --joker-purple: #7b2cbf;
+            --joker-green: #38b000;
+            --joker-dark: #000000;
+            --joker-card: #121212;
+            --column-bg: #1a1a1a;
+            --text-main: #ffffff;
+            --text-secondary: #a0a0a0;
+        }
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--joker-dark); 
+            color: var(--text-main); 
+            letter-spacing: -0.01em;
+        }
+        h1, h2, h3, .oswald { font-family: 'Oswald', sans-serif; text-transform: uppercase; }
+        
+        .glass-card { 
+            background: var(--joker-card); 
+            border: 1px solid rgba(123, 44, 191, 0.25);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.8);
+        }
+        
+        .kanban-column { 
+            min-height: 700px; 
+            border-radius: 8px; 
+            background-color: var(--column-bg); 
+            border: 2px solid #262626;
+            padding: 12px;
+        }
+
+        .card { 
+            cursor: grab; 
+            transition: transform 0.2s ease, box-shadow 0.2s ease; 
+            background: #222222;
+            border: 1px solid #333333;
+        }
+        .card:active { cursor: grabbing; }
+        .card:hover { 
+            transform: scale(1.02);
+            box-shadow: 0 10px 20px rgba(123, 44, 191, 0.2);
+            border-color: var(--joker-purple);
+        }
+
+        .border-todo { border-left: 5px solid #4b5563; }
+        .border-doing { border-left: 5px solid var(--joker-purple); }
+        .border-review { border-left: 5px solid #f59e0b; }
+        .border-done { border-left: 5px solid var(--joker-green); }
+        .border-blocked { border-left: 5px solid #dc2626; animation: pulse-red 2s infinite; }
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(220, 38, 38, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+        }
+
+        .btn-action { 
+            background-color: var(--joker-green); 
+            color: black; 
+            font-weight: 800;
+            transition: all 0.2s;
+        }
+        .btn-action:hover { background-color: #45cf00; transform: translateY(-2px); }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: var(--joker-purple); border-radius: 10px; }
+    </style>
+</head>
+<body class="pb-20">
+
+    <!-- HEADER CENTRALIZADO -->
+    <header class="pt-10 pb-6 text-center border-b border-purple-900/20 bg-black/50">
+        <div class="inline-block bg-joker-purple text-black px-4 py-1 oswald text-sm mb-2 font-black tracking-tighter">ESTRUTURA DE ELITE</div>
+        <h1 class="text-6xl font-black tracking-[0.2em] oswald text-white mb-2">B.L. <span class="text-joker-green">COMPANY</span></h1>
+        <p class="text-xs text-purple-400 font-bold uppercase tracking-[0.5em] mb-4 italic">Operação Ápice</p>
+        
+        <div class="flex justify-center gap-8 mt-6">
+            <div class="text-center">
+                <p class="text-[9px] text-gray-500 font-bold uppercase">Ciclo Atual</p>
+                <p id="week-indicator" class="text-sm font-bold text-white uppercase tracking-widest">---</p>
+            </div>
+            <div class="w-px h-8 bg-purple-900/30"></div>
+            <div class="text-center">
+                <p class="text-[9px] text-gray-500 font-bold uppercase">Entregas</p>
+                <p id="say-do-ratio" class="text-sm font-bold text-joker-green">0%</p>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[1800px] mx-auto p-8 grid grid-cols-12 gap-8">
+        
+        <!-- COLUNA DE CONTROLE (ESQUERDA) -->
+        <aside class="col-span-12 lg:col-span-3 space-y-6">
+            
+            <!-- ADICIONAR TAREFA -->
+            <div class="glass-card p-6 rounded-lg">
+                <h3 class="text-xs font-black mb-6 text-joker-green uppercase tracking-widest flex items-center gap-2">
+                    <span class="w-2 h-2 bg-joker-green rounded-full"></span> Nova Missão
+                </h3>
+                <div class="space-y-4">
+                    <input id="task-name" type="text" placeholder="Nome da tarefa..." class="w-full bg-neutral-800 border border-neutral-700 p-3 rounded text-sm text-white focus:border-joker-purple outline-none">
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <select id="task-owner" class="bg-neutral-800 border border-neutral-700 p-3 rounded text-xs text-white outline-none">
+                            <option value="" disabled selected>Executor</option>
+                            <option value="João Vitor">João Vitor</option>
+                            <option value="Leonam">Leonam</option>
+                            <option value="Leonardo">Leonardo</option>
+                        </select>
+                        <select id="task-size" class="bg-neutral-800 border border-neutral-700 p-3 rounded text-xs text-white outline-none">
+                            <option value="P">P</option>
+                            <option value="M" selected>M</option>
+                            <option value="G">G</option>
+                        </select>
+                    </div>
+
+                    <div class="bg-black/40 p-3 rounded">
+                        <label class="text-[9px] font-bold text-gray-500 uppercase block mb-2">Prioridade (ICE)</label>
+                        <input id="ice-total" type="number" placeholder="Ex: 80" class="w-full bg-neutral-900 border border-neutral-700 p-2 rounded text-sm text-center text-joker-green font-bold outline-none">
+                    </div>
+
+                    <button onclick="createTask()" class="w-full btn-action py-3 rounded text-xs uppercase tracking-widest">Adicionar ao Fluxo</button>
+                </div>
+            </div>
+
+            <!-- WIP MONITOR -->
+            <div class="glass-card p-5 rounded-lg border-l-2 border-joker-purple">
+                <h3 class="text-[10px] font-black mb-4 text-white uppercase tracking-widest">Carga por Pessoa</h3>
+                <div id="wip-monitor" class="space-y-2 text-xs"></div>
+            </div>
+
+            <!-- LOG DE FALHAS (RESTAURADO) -->
+            <div class="glass-card p-5 rounded-lg border-l-2 border-red-600">
+                <h3 class="text-[10px] font-black mb-4 text-red-500 uppercase tracking-widest">Logs de Falhas / Bloqueios</h3>
+                <div id="fail-log-container" class="space-y-3 max-h-[200px] overflow-y-auto pr-1">
+                    <p class="text-gray-600 text-[10px] italic">Sem falhas registradas.</p>
+                </div>
+            </div>
+
+            <!-- HISTÓRICO -->
+            <div class="glass-card p-5 rounded-lg border-l-2 border-slate-600">
+                <h3 class="text-[10px] font-black mb-4 text-gray-400 uppercase tracking-widest italic">Histórico de Sprints</h3>
+                <div id="history-container" class="space-y-2 max-h-[150px] overflow-y-auto pr-1">
+                    <p class="text-gray-600 text-[10px] italic">Sem histórico ainda.</p>
+                </div>
+                <button onclick="archiveSprint()" class="w-full mt-4 border border-white/10 hover:bg-white/5 py-2 rounded text-[9px] uppercase font-bold text-gray-300">Encerrar Sprint</button>
+            </div>
+
+        </aside>
+
+        <!-- QUADRO KANBAN (DIREITA) -->
+        <section class="col-span-12 lg:col-span-9 grid grid-cols-1 md:grid-cols-4 gap-6">
+            
+            <!-- BACKLOG -->
+            <div class="space-y-4">
+                <div class="flex justify-between items-center px-1">
+                    <h4 class="oswald text-xs tracking-[0.2em] text-gray-400 italic">01. Backlog</h4>
+                    <span id="badge-todo" class="bg-neutral-800 px-2 py-0.5 rounded text-[10px] font-bold">0</span>
+                </div>
+                <div id="col-todo" class="kanban-column" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            </div>
+
+            <!-- EXECUÇÃO -->
+            <div class="space-y-4">
+                <div class="flex justify-between items-center px-1">
+                    <h4 class="oswald text-xs tracking-[0.2em] text-joker-purple italic">02. Fazendo</h4>
+                    <span id="badge-doing" class="bg-purple-900/30 px-2 py-0.5 rounded text-[10px] font-bold text-joker-purple">0</span>
+                </div>
+                <div id="col-doing" class="kanban-column" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            </div>
+
+            <!-- REVISÃO -->
+            <div class="space-y-4">
+                <div class="flex justify-between items-center px-1">
+                    <h4 class="oswald text-xs tracking-[0.2em] text-orange-500 italic">03. Revisão</h4>
+                    <span id="badge-review" class="bg-orange-900/30 px-2 py-0.5 rounded text-[10px] font-bold text-orange-500">0</span>
+                </div>
+                <div id="col-review" class="kanban-column" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            </div>
+
+            <!-- FINALIZADO -->
+            <div class="space-y-4">
+                <div class="flex justify-between items-center px-1">
+                    <h4 class="oswald text-xs tracking-[0.2em] text-joker-green italic">04. Pronto</h4>
+                    <span id="badge-done" class="bg-green-900/30 px-2 py-0.5 rounded text-[10px] font-bold text-joker-green">0</span>
+                </div>
+                <div id="col-done" class="kanban-column" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- MODAL DE ANOTAÇÕES -->
+    <div id="note-modal" class="fixed inset-0 bg-black/95 hidden z-[100] items-center justify-center p-4">
+        <div class="glass-card p-8 rounded-lg border-t-4 border-joker-purple max-w-lg w-full">
+            <h2 class="oswald text-2xl text-white mb-1">Log da Missão</h2>
+            <p id="modal-task-title" class="text-xs text-joker-green font-bold mb-6 italic"></p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] font-black text-gray-500 uppercase mb-2 block">O que aconteceu ou o que falta?</label>
+                    <textarea id="modal-fail-text" class="w-full bg-black border border-neutral-700 p-4 rounded text-sm h-32 text-white outline-none focus:border-joker-green"></textarea>
+                </div>
+                <div class="flex items-center gap-3 bg-red-900/10 p-3 rounded border border-red-900/20">
+                    <input type="checkbox" id="modal-is-blocked" class="w-5 h-5 accent-red-600">
+                    <label for="modal-is-blocked" class="text-xs font-black text-red-500 uppercase italic">Bloquear esta tarefa (Algo deu errado)</label>
+                </div>
+                <div class="flex gap-4 pt-4">
+                    <button onclick="saveTaskNote()" class="flex-1 btn-action py-3 rounded text-xs uppercase">Salvar Log</button>
+                    <button onclick="closeModal()" class="px-6 bg-neutral-800 text-white rounded text-xs uppercase">Voltar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let state = JSON.parse(localStorage.getItem('bl_company_final_state')) || {
+            tasks: [],
+            archive: [],
+            currentWeek: getWeekId()
+        };
+
+        let activeTaskId = null;
+
+        function getWeekId() {
+            const now = new Date();
+            const startOfYear = new Date(now.getFullYear(), 0, 1);
+            const week = Math.ceil((((now - startOfYear) / 86400000) + startOfYear.getDay() + 1) / 7);
+            return `Sprint ${week} / ${now.getFullYear()}`;
+        }
+
+        function createTask() {
+            const name = document.getElementById('task-name').value;
+            const owner = document.getElementById('task-owner').value;
+            const size = document.getElementById('task-size').value;
+            const ice = parseInt(document.getElementById('ice-total').value) || 0;
+
+            if(!name || !owner) return;
+
+            const task = {
+                id: 'BL-' + Math.random().toString(36).substr(2, 5).toUpperCase(),
+                name, owner, size, ice,
+                status: 'todo',
+                notes: [],
+                isBlocked: false
+            };
+
+            state.tasks.push(task);
+            updateUI();
+            document.getElementById('task-name').value = '';
+            document.getElementById('ice-total').value = '';
+        }
+
+        function updateUI() {
+            localStorage.setItem('bl_company_final_state', JSON.stringify(state));
+            document.getElementById('week-indicator').innerText = state.currentWeek;
+            renderBoard();
+            renderWIP();
+            renderMetrics();
+            renderHistory();
+            renderFailLog();
+        }
+
+        function renderBoard() {
+            const cols = ['todo', 'doing', 'review', 'done'];
+            cols.forEach(col => {
+                const container = document.getElementById(`col-${col}`);
+                container.innerHTML = '';
+                const filtered = state.tasks.filter(t => t.status === col);
+                document.getElementById(`badge-${col}`).innerText = filtered.length;
+                
+                filtered.sort((a,b) => b.ice - a.ice).forEach(t => {
+                    const card = document.createElement('div');
+                    card.id = t.id;
+                    card.draggable = true;
+                    card.ondragstart = (ev) => ev.dataTransfer.setData("text", t.id);
+                    
+                    let statusClass = t.isBlocked ? 'border-blocked' : `border-${col}`;
+                    
+                    card.className = `card p-4 rounded-md mb-3 ${statusClass}`;
+                    card.innerHTML = `
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[8px] font-black bg-black px-1.5 py-0.5 rounded text-joker-green border border-white/5">ICE ${t.ice}</span>
+                            <span class="text-[8px] font-black text-gray-500 italic uppercase tracking-tighter">${t.size}</span>
+                        </div>
+                        <h5 class="text-[11px] font-bold text-white mb-3 uppercase tracking-tight leading-tight">${t.name}</h5>
+                        
+                        <div class="flex justify-between items-center border-t border-white/5 pt-3">
+                            <span class="text-[9px] font-black text-purple-400 uppercase tracking-tighter">${t.owner}</span>
+                            <div class="flex gap-2">
+                                <button onclick="openNoteModal('${t.id}')" class="text-gray-600 hover:text-white"><svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path></svg></button>
+                                <button onclick="deleteTask('${t.id}')" class="text-gray-800 hover:text-red-500"><svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9z" clip-rule="evenodd"></path></svg></button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            });
+        }
+
+        function renderWIP() {
+            const container = document.getElementById('wip-monitor');
+            const owners = ["João Vitor", "Leonam", "Leonardo"];
+            container.innerHTML = owners.map(owner => {
+                const count = state.tasks.filter(t => t.owner === owner && t.status === 'doing').length;
+                const isOver = count > 2;
+                return `
+                    <div class="flex justify-between items-center p-2 rounded ${isOver ? 'bg-red-900/20 text-red-500 border border-red-900/50' : 'bg-white/5 text-gray-300'}">
+                        <span class="font-bold">${owner}</span>
+                        <span class="font-black">${count}/2</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderFailLog() {
+            const container = document.getElementById('fail-log-container');
+            const fails = state.tasks.filter(t => t.notes.length > 0 || t.isBlocked);
+            
+            if(fails.length === 0) {
+                container.innerHTML = '<p class="text-gray-600 text-[10px] italic">Sem falhas registradas.</p>';
+                return;
+            }
+
+            container.innerHTML = fails.map(f => `
+                <div class="p-2 border-l-2 ${f.isBlocked ? 'border-red-600 bg-red-900/10' : 'border-purple-600 bg-purple-900/10'} mb-2">
+                    <p class="text-[10px] font-black ${f.isBlocked ? 'text-red-500' : 'text-purple-400'} uppercase">${f.name}</p>
+                    <p class="text-gray-400 text-[9px] mt-1 italic">${f.notes[f.notes.length-1] || 'Marcado como bloqueado'}</p>
+                </div>
+            `).join('');
+        }
+
+        function renderMetrics() {
+            const done = state.tasks.filter(t => t.status === 'done').length;
+            const total = state.tasks.length;
+            const ratio = total > 0 ? Math.round((done/total)*100) : 0;
+            document.getElementById('say-do-ratio').innerText = ratio + '%';
+        }
+
+        function renderHistory() {
+            const container = document.getElementById('history-container');
+            if(state.archive.length === 0) return;
+            container.innerHTML = state.archive.slice().reverse().map(h => `
+                <div class="p-2 border-b border-white/5 flex justify-between items-center text-[10px]">
+                    <span class="text-gray-400 font-bold">${h.week}</span>
+                    <span class="text-joker-green font-black">${h.doneCount} MISSÕES</span>
+                </div>
+            `).join('');
+        }
+
+        function openNoteModal(id) {
+            activeTaskId = id;
+            const t = state.tasks.find(x => x.id === id);
+            document.getElementById('modal-task-title').innerText = t.name;
+            document.getElementById('modal-fail-text').value = t.notes[t.notes.length-1] || '';
+            document.getElementById('modal-is-blocked').checked = t.isBlocked;
+            document.getElementById('note-modal').classList.replace('hidden', 'flex');
+        }
+
+        function saveTaskNote() {
+            const note = document.getElementById('modal-fail-text').value;
+            const blocked = document.getElementById('modal-is-blocked').checked;
+            state.tasks = state.tasks.map(t => {
+                if(t.id === activeTaskId) {
+                    if(note && note !== t.notes[t.notes.length-1]) t.notes.push(note);
+                    t.isBlocked = blocked;
+                }
+                return t;
+            });
+            closeModal();
+            updateUI();
+        }
+
+        function closeModal() {
+            document.getElementById('note-modal').classList.replace('flex', 'hidden');
+        }
+
+        function deleteTask(id) {
+            if(confirm("Excluir missão permanentemente?")) {
+                state.tasks = state.tasks.filter(t => t.id !== id);
+                updateUI();
+            }
+        }
+
+        function archiveSprint() {
+            if(confirm("Isso irá arquivar o 'Pronto' e limpar o quadro para a nova semana. Deseja continuar?")) {
+                const doneCount = state.tasks.filter(t => t.status === 'done').length;
+                state.archive.push({ week: state.currentWeek, doneCount });
+                state.tasks = state.tasks.filter(t => t.status !== 'done');
+                state.currentWeek = getWeekId();
+                updateUI();
+            }
+        }
+
+        function allowDrop(ev) { ev.preventDefault(); }
+        function drop(ev) {
+            ev.preventDefault();
+            const id = ev.dataTransfer.getData("text");
+            const col = ev.target.closest('.kanban-column').id.replace('col-', '');
+            state.tasks = state.tasks.map(t => {
+                if(t.id === id) t.status = col;
+                return t;
+            });
+            updateUI();
+        }
+
+        window.onload = updateUI;
+    </script>
+</body>
+</html>
